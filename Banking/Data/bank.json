@@ -1,0 +1,33 @@
+{
+  "accounts": [
+    {
+      "cardNumber": "4111111111111111",
+      "expiryDate": "12/28",
+      "pin": "1234",
+      "balance": 2500.50,
+      "currency": "GEL",
+      "transactions": [
+        {
+          "transactionDate": "2026-06-15T10:30:00",
+          "transactionType": "Deposit",
+          "amountGEL": 500.00,
+          "amountUSD": 0,
+          "amountEUR": 0
+        }
+      ]
+    },
+    {
+      "cardNumber": "5500000000000004",
+      "expiryDate": "06/27",
+      "pin": "5678",
+      "balance": 1200.00,
+      "currency": "USD",
+      "transactions": []
+    }
+  ],
+  "exchangeRates": {
+    "USD": 2.65,
+    "EUR": 2.85,
+    "GEL": 1.00
+  }
+}
