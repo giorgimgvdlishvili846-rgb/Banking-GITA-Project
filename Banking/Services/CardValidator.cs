@@ -44,6 +44,20 @@ public static class CardValidator
         return expiry >= DateTime.Now;
     }
 
+    public static bool IsValidPinFormat(string pin)
+    {
+        return pin.Length == 4 && pin.All(char.IsDigit);
+    }
+
+    public static string MaskCardNumber(string cardNumber)
+    {
+        string digits = new(cardNumber.Where(char.IsDigit).ToArray());
+        if (digits.Length < 4)
+            return "****";
+
+        return "****" + digits[^4..];
+    }
+
     public static Account? FindAccount(BankData data, string cardNumber, string expiryDate)
     {
         string normalizedCard = new(cardNumber.Where(char.IsDigit).ToArray());

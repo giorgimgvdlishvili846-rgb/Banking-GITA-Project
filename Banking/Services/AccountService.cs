@@ -43,6 +43,12 @@ public class AccountService
         return CurrentAccount!.Balance;
     }
 
+    public string GetCurrency()
+    {
+        EnsureLoggedIn();
+        return CurrentAccount!.Currency;
+    }
+
     public bool Withdraw(decimal amount)
     {
         EnsureLoggedIn();
@@ -99,15 +105,25 @@ public class AccountService
         return true;
     }
 
-    public decimal ConvertCurrency(string targetCurrency, decimal amount)
+    public bool ConvertCurrency(string targetCurrency, decimal amount, out decimal newBalance)
     {
+        newBalance = 0;
         EnsureLoggedIn();
 
         if (amount <= 0)
             throw new ArgumentException("თანხა უნდა იყოს დადებითი.");
 
-        string sourceCurrency = CurrentAccount!.Currency.ToUpperInvariant();
+        if (amount > CurrentAccount!.Balance)
+            return false;
+
+        string sourceCurrency = CurrentAccount.Currency.ToUpperInvariant();
         targetCurrency = targetCurrency.ToUpperInvariant();
+
+        if (sourceCurrency == targetCurrency)
+            throw new ArgumentException("ანგარიში უკვე ამ ვალუტითაა.");
+
+        if (amount != CurrentAccount.Balance)
+            throw new ArgumentException($"კონვერტაციისთვის მთელი ნაშთი უნდა მიუთითოთ ({CurrentAccount.Balance:F2} {sourceCurrency}).");
 
         if (!_data.ExchangeRates.ContainsKey(sourceCurrency) ||
             !_data.ExchangeRates.ContainsKey(targetCurrency))
@@ -115,13 +131,17 @@ public class AccountService
 
         decimal sourceRate = _data.ExchangeRates[sourceCurrency];
         decimal targetRate = _data.ExchangeRates[targetCurrency];
-        decimal converted = amount * sourceRate / targetRate;
+        decimal balanceBefore = CurrentAccount.Balance;
+        newBalance = balanceBefore * sourceRate / targetRate;
+
+        CurrentAccount.Balance = newBalance;
+        CurrentAccount.Currency = targetCurrency;
 
         AddTransaction($"CurrencyConversion {sourceCurrency}->{targetCurrency}", amount, sourceCurrency);
         Save();
-        _logger.Info($"ვალუტის კონვერტაცია: {amount} {sourceCurrency} -> {converted:F2} {targetCurrency}");
+        _logger.Info($"ვალუტის კონვერტაცია: {balanceBefore} {sourceCurrency} -> {newBalance:F2} {targetCurrency}, ბარათი: {MaskCard(CurrentAccount.CardNumber)}");
 
-        return converted;
+        return true;
     }
 
     private void AddTransaction(string type, decimal amount, string currency)

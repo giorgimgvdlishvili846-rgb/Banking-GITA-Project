@@ -80,7 +80,7 @@ class Program
         if (!CardValidator.IsValidCardNumber(cardNumber))
         {
             Console.WriteLine("შეცდომა: ბარათის ნომერი არასწორია.");
-            logger.Warning($"არასწორი ბარათის ნომერი: {cardNumber}");
+            logger.Warning($"არასწორი ბარათის ნომერი: {CardValidator.MaskCardNumber(cardNumber)}");
             return false;
         }
 
@@ -107,6 +107,13 @@ class Program
         {
             Console.Write($"PIN კოდი (მცდელობა {attempt}/{MaxPinAttempts}): ");
             string pin = Console.ReadLine()?.Trim() ?? string.Empty;
+
+            if (!CardValidator.IsValidPinFormat(pin))
+            {
+                Console.WriteLine("შეცდომა: PIN უნდა იყოს 4 ციფრი.");
+                logger.Warning($"არასწორი PIN ფორმატი, მცდელობა {attempt}");
+                continue;
+            }
 
             accountService.SetCurrentAccount(account);
 
@@ -189,7 +196,8 @@ class Program
     static void ShowBalance(AccountService accountService)
     {
         decimal balance = accountService.GetBalance();
-        Console.WriteLine($"\nმიმდინარე ნაშთი: {balance:F2}");
+        string currency = accountService.GetCurrency();
+        Console.WriteLine($"\nმიმდინარე ნაშთი: {balance:F2} {currency}");
     }
 
     static void Withdraw(AccountService accountService)
@@ -201,8 +209,9 @@ class Program
             return;
         }
 
+        string currency = accountService.GetCurrency();
         if (accountService.Withdraw(amount))
-            Console.WriteLine($"წარმატებით გამოიტანეთ {amount:F2}.");
+            Console.WriteLine($"წარმატებით გამოიტანეთ {amount:F2} {currency}.");
         else
             Console.WriteLine("შეცდომა: საკმარისი თანხა არ გაქვთ.");
     }
@@ -217,7 +226,7 @@ class Program
         }
 
         accountService.Deposit(amount);
-        Console.WriteLine($"წარმატებით შეიტანეთ {amount:F2}.");
+        Console.WriteLine($"წარმატებით შეიტანეთ {amount:F2} {accountService.GetCurrency()}.");
     }
 
     static void ShowLastTransactions(AccountService accountService)
@@ -267,19 +276,25 @@ class Program
 
     static void ConvertCurrency(AccountService accountService)
     {
+        string currentCurrency = accountService.GetCurrency();
+        decimal currentBalance = accountService.GetBalance();
+
+        Console.WriteLine($"\nმიმდინარე ნაშთი: {currentBalance:F2} {currentCurrency}");
         Console.WriteLine("ხელმისაწვდომი ვალუტები: USD, EUR, GEL");
         Console.Write("სასურველი ვალუტა: ");
         string targetCurrency = Console.ReadLine()?.Trim().ToUpperInvariant() ?? string.Empty;
 
-        Console.Write("თანხა: ");
+        Console.Write($"გასაკონვერტირებელი თანხა ({currentCurrency}): ");
         if (!TryReadDecimal(out decimal amount))
         {
             Console.WriteLine("არასწორი თანხა.");
             return;
         }
 
-        decimal result = accountService.ConvertCurrency(targetCurrency, amount);
-        Console.WriteLine($"კონვერტირებული თანხა: {result:F2} {targetCurrency}");
+        if (accountService.ConvertCurrency(targetCurrency, amount, out decimal newBalance))
+            Console.WriteLine($"კონვერტაცია წარმატებულია. ახალი ნაშთი: {newBalance:F2} {targetCurrency}");
+        else
+            Console.WriteLine("შეცდომა: საკმარისი თანხა არ გაქვთ.");
     }
 
     static bool TryReadInt(out int value)
