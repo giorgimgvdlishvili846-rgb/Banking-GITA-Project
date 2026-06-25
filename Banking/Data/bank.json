@@ -4,13 +4,27 @@
       "cardNumber": "4111111111111111",
       "expiryDate": "12/28",
       "pin": "1234",
-      "balance": 2500.50,
-      "currency": "GEL",
+      "balance": 981.3207547169811320754716981,
+      "currency": "USD",
       "transactions": [
         {
           "transactionDate": "2026-06-15T10:30:00",
           "transactionType": "Deposit",
           "amountGEL": 500.00,
+          "amountUSD": 0,
+          "amountEUR": 0
+        },
+        {
+          "transactionDate": "2026-06-26T02:27:49.238696+04:00",
+          "transactionType": "Deposit",
+          "amountGEL": 100,
+          "amountUSD": 0,
+          "amountEUR": 0
+        },
+        {
+          "transactionDate": "2026-06-26T02:29:17.949223+04:00",
+          "transactionType": "CurrencyConversion GEL->USD",
+          "amountGEL": 2600.50,
           "amountUSD": 0,
           "amountEUR": 0
         }
@@ -20,9 +34,17 @@
       "cardNumber": "5500000000000004",
       "expiryDate": "06/27",
       "pin": "5678",
-      "balance": 1200.00,
+      "balance": 1219.00,
       "currency": "USD",
-      "transactions": []
+      "transactions": [
+        {
+          "transactionDate": "2026-06-25T09:32:08.502052+04:00",
+          "transactionType": "Deposit",
+          "amountGEL": 0,
+          "amountUSD": 19,
+          "amountEUR": 0
+        }
+      ]
     }
   ],
   "exchangeRates": {
